@@ -4,7 +4,7 @@
 function buubleSort(arr){
     let noSwaps;
     const swap = (arr, indx1, indx2)=>{
-        [arr[j], arr[j+1]] = [arr[j+1], arr[j]]
+        [arr[indx1], arr[indx2]] = [arr[indx2], arr[indx1]]
     }
     for(let i=arr.length; i>0; i--){
         noSwaps = true;
