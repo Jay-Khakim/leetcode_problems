@@ -63,7 +63,30 @@ WHERE W1.temperature > W2.temperature;
 
 
 
+-- id is the primary key (column with unique values) for this table.
+-- Each row of this table indicates the name of an employee, their department, and the id of their manager.
+-- If managerId is null, then the employee does not have a manager.
+-- No employee will be the manager of themself.
+ 
 
+-- Write a solution to find managers with at least five direct reports.
+
+-- Return the result table in any order.
+
+-- The result format is in the following example.
+
+ 
+
+SELECT 
+    e1.name
+FROM 
+    Employee e1
+JOIN (
+    SELECT managerId, COUNT(*) AS directReports
+    FROM Employee
+    GROUP BY managerId
+    HAVING COUNT(*) >= 5
+) E2 ON e1.id = E2.managerId;
 
 
 -- 1661. Average Time of Process per Machine
@@ -80,3 +103,34 @@ join Activity a2
 on a1.machine_id=a2.machine_id and a1.process_id=a2.process_id
 and a1.activity_type = 'start' and a2.activity_type='end'
 group by a1.machine_id
+
+
+
+-- Write a solution to report the movies with an odd-numbered ID and a description that is not "boring".
+
+-- Return the result table ordered by rating in descending order.
+
+-- The result format is in the following example.
+
+SELECT * FROM Cinema
+Where 
+    cinema.id % 2 <> 0 
+    and cinema.description <> "boring"
+ORDER BY rating DESC;
+
+
+
+-- Write a solution to find the average selling price for each product. average_price should be rounded to 2 decimal places.
+
+-- Return the result table in any order.
+
+-- The result format is in the following example.
+
+
+select p.product_id, ifnull(round(sum(p.price * u.units)/sum(u.units), 2), 0) as average_price
+from Prices p 
+LEFT JOIN UnitsSold u
+ON p.product_id = u.product_id 
+and u.purchase_date >= p.start_date
+and u.purchase_date <= p.end_date
+GROUP BY p.product_id
