@@ -122,6 +122,40 @@ class DoublyLinkedList {
 		this.length++;
 		return true;
 	}
+
+	//Removing the node from the list
+	remove(index) {
+		if (index < 0 || index >= this.length) return false;
+		if (index === 0) return this.shift();
+		if (index === this.length - 1) return this.pop();
+		let removedNode = this.get(index);
+		removedNode.prev.next = removedNode.next;
+		removedNode.next.prev = removedNode.prev;
+		removedNode.next = null;
+		removedNode.prev = null;
+		this.length--;
+		return removedNode;
+	}
+
+	reverse() {
+		let current = this.head;
+		let temp = null;
+		
+		while (current !== null) {
+		    // Swap next and prev for all nodes
+		    temp = current.prev;
+		    current.prev = current.next;
+		    current.next = temp;
+		    
+		    // Move to the next node (which is now previous node)
+		    current = current.prev;
+		}
+		
+		// Before changing the head, check for the cases like empty list and list with only one node
+		if (temp !== null) {
+		    this.head = temp.prev;
+		}
+	    }
 }
 let list = new DoublyLinkedList();
 list.push("Hello");
@@ -133,5 +167,6 @@ list.push("19191");
 // console.log(list.shift());
 // console.log(list.unshift("This is first"));
 // console.log(list.set(0, "HELLO"));
-console.log(list.insert(1, "Jake"));
+// console.log(list.insert(1, "Jake"));
+console.log(list.remove(1))
 console.log(list);
