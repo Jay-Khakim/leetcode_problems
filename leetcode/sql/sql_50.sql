@@ -188,3 +188,77 @@ ROUND(AVG(IF(RATING<3,1,0))*100, 2) AS poor_query_percentage
 FROM Queries
 WHERE query_name IS NOT NULL
 GROUP BY query_name
+
+
+-- 1193. Monthly Transactions I
+-- Write an SQL query to find for each month and country, the number of transactions and their total amount, the number of approved transactions and their total amount.
+
+-- Return the result table in any order.
+
+-- The query result format is in the following example.
+SELECT  SUBSTR(trans_date,1,7) as month, country, count(id) as trans_count, SUM(CASE WHEN state = 'approved' then 1 else 0 END) as approved_count, SUM(amount) as trans_total_amount, SUM(CASE WHEN state = 'approved' then amount else 0 END) as approved_total_amount
+FROM Transactions
+GROUP BY month, country
+
+
+
+
+
+-- 1174. Immediate Food Delivery II
+-- If the customer's preferred delivery date is the same as the order date, then the order is called immediate; otherwise, it is called scheduled.
+
+-- The first order of a customer is the order with the earliest order date that the customer made. 
+-- It is guaranteed that a customer has precisely one first order.
+
+-- Write a solution to find the percentage of immediate orders in the first orders of all customers, rounded to 2 decimal places.
+
+-- The result format is in the following example.
+WITH first_orders AS (
+    SELECT customer_id, min(order_date) as min_date
+    FROM delivery
+    GROUP BY customer_id
+)
+
+SELECT ROUND((SUM(CASE WHEN min_date = customer_pref_delivery_date THEN 1 ELSE 0 END )/
+    COUNT(DISTINCT fo.customer_id))*100, 2) immediate_percentage
+
+FROM first_orders fo JOIN delivery d
+ON fo.customer_id = d.customer_id AND fo.min_date=d.order_date
+
+
+
+
+
+
+-- 550. Game Play Analysis IV
+-- Write a solution to report the fraction of players that logged in again on the day after the day they first logged in, rounded to 2 decimal places. In other words, you need to count the number of players that logged in for at least two consecutive days starting from their first login date, then divide that number by the total number of players.
+
+-- The result format is in the following example.
+
+select 
+    round(sum(temp)/count(distinct player_id), 2) as fraction
+from 
+(
+  select
+    player_id,
+    datediff(event_date, min(event_date) over(partition by player_id)) = 1 as temp
+  from 
+    Activity
+) as t
+
+
+
+
+
+
+
+-- 2356. Number of Unique Subjects Taught by Each Teacher
+-- Write a solution to calculate the number of unique subjects each teacher teaches in the university.
+
+-- Return the result table in any order.
+
+-- The result format is shown in the following example.
+
+SELECT teacher_id, COUNT(DISTINCT subject_id ) AS cnt 
+FROM Teacher
+GROUP BY teacher_id
