@@ -296,3 +296,73 @@ from
 SELECT teacher_id, COUNT(DISTINCT subject_id ) AS cnt 
 FROM Teacher
 GROUP BY teacher_id
+
+
+
+
+
+
+-- 619. Biggest Single Number
+-- A single number is a number that appeared only once in the MyNumbers table.
+
+-- Find the largest single number. If there is no single number, report null.
+
+-- The result format is in the following example.
+SELECT MAX(num) AS num
+FROM (
+    SELECT num
+    FROM MyNumbers
+    GROUP BY num
+    HAVING COUNT(num) = 1
+) AS unique_numbers;
+
+
+
+
+-- 1070. Product Sales Analysis III
+-- Write a solution to select the product id, year, quantity, and price for the first year of every product sold.
+
+-- Return the resulting table in any order.
+
+-- The result format is in the following example.
+WITH FY AS (
+    SELECT product_id, MIN(year) AS minyear FROM Sales 
+    GROUP BY product_id 
+)
+
+SELECT s.product_id, s.year AS first_year, s.quantity, s.price
+FROM Sales s 
+INNER JOIN FY ON FY.product_id = s.product_id AND s.year = FY.minyear;
+
+
+-- 1045. Customers Who Bought All Products
+-- Write a solution to report the customer ids from the Customer table that bought all the products in the Product table.
+
+-- Return the result table in any order.
+
+-- The result format is in the following example.
+SELECT customer_id
+FROM Customer 
+GROUP BY customer_id
+HAVING COUNT(DISTINCT product_key) = (SELECT COUNT(product_key) FROM Product)
+
+
+
+-- 1731. The Number of Employees Which Report to Each Employee
+
+-- For this problem, we will consider a manager an employee who has at least 1 other employee reporting to them.
+
+-- Write a solution to report the ids and the names of all managers, the number of employees who report directly to them, and the average age of the reports rounded to the nearest integer.
+
+-- Return the result table ordered by employee_id.
+
+-- The result format is in the following example.
+
+ 
+
+SELECT mgr.employee_id, mgr.name, 
+COUNT(emp.employee_id) AS reports_count, ROUND(AVG(emp.age)) AS average_age
+FROM employees emp JOIN employees mgr
+ON emp.reports_to = mgr.employee_id
+GROUP BY employee_id
+ORDER BY employee_id
