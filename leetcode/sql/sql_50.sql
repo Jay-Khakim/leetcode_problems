@@ -366,3 +366,210 @@ FROM employees emp JOIN employees mgr
 ON emp.reports_to = mgr.employee_id
 GROUP BY employee_id
 ORDER BY employee_id
+
+
+
+
+-- 1789. Primary Department for Each Employee
+-- Employees can belong to multiple departments. When the employee joins other departments, they need to decide which department is their primary department. Note that when an employee belongs to only one department, their primary column is 'N'.
+
+-- Write a solution to report all the employees with their primary department. For employees who belong to one department, report their only department.
+
+-- Return the result table in any order.
+
+-- The result format is in the following example.
+SELECT 
+  employee_id, 
+  department_id 
+FROM 
+  Employee 
+WHERE 
+  primary_flag = 'Y' 
+UNION 
+
+SELECT 
+  employee_id, 
+  department_id 
+FROM 
+  Employee 
+GROUP BY 
+  employee_id 
+HAVING 
+  COUNT(employee_id) = 1;
+
+
+  SELECT employee_id, department_id
+FROM Employee
+WHERE primary_flag='Y' OR 
+    employee_id in
+    (SELECT employee_id
+    FROM Employee
+    Group by employee_id
+    having count(employee_id)=1)
+
+
+
+
+-- 610. Triangle Judgement
+-- Report for every three line segments whether they can form a triangle.
+
+-- Return the result table in any order.
+
+-- The result format is in the following example.
+SELECT x, y, z,
+CASE WHEN x+y>z AND y+z > x AND z+x > y THEN "Yes" ELSE "No" END
+AS triangle FROM Triangle
+
+SELECT *, IF(x+y>z AND y+z>x AND z+x>y, "Yes", "No") AS triangle FROM Triangle
+
+
+
+
+-- 180. Consecutive Numbers
+-- Find all numbers that appear at least three times consecutively.
+
+-- Return the result table in any order.
+
+-- The result format is in the following example.
+
+SELECT distinct l1.num as ConsecutiveNums
+FROM
+    Logs l1,
+    Logs l2,
+    Logs l3
+
+WHERE
+    l1.id = l2.id-1
+    and l2.id = l3.id-1
+    and l1.num= l2.num
+    and l2.num= l3.num
+
+
+
+
+
+
+-- 1164. Product Price at a Given Date
+-- Write a solution to find the prices of all products on 2019-08-16. Assume the price of all products before any change is 10.
+
+-- Return the result table in any order.
+
+-- The result format is in the following example.
+
+# Write your MySQL query statement below
+select 
+    distinct product_id,
+    10 as price
+from 
+    products
+group by
+    product_id
+having
+    min(change_date) > "2019-08-16"
+
+union
+
+select 
+    product_id, 
+    new_price
+from 
+    Products 
+where 
+    (product_id, change_date) in(
+                                select 
+                                    product_id, 
+                                    max(change_date) as recent_date
+                                from 
+                                    Products
+                                where 
+                                    change_date <= "2019-08-16"
+                                group by 
+                                    product_id
+                                )
+
+
+
+
+-- 608. Tree Node
+-- Each node in the tree can be one of three types:
+
+-- "Leaf": if the node is a leaf node.
+-- "Root": if the node is the root of the tree.
+-- "Inner": If the node is neither a leaf node nor a root node.
+-- Write a solution to report the type of each node in the tree.
+
+-- Return the result table in any order.
+
+-- The result format is in the following example.
+
+ 
+
+SELECT id, CASE WHEN p_id IS NULL THEN "Root"
+WHEN id NOT IN (
+    SELECT p_id
+    FROM Tree
+    WHERE p_id IS NOT NULL
+) THEN "Leaf" ELSE "Inner" END AS type
+FROM Tree
+ORDER BY id
+
+
+
+-- 1204. Last Person to Fit in the Bus
+-- There is a queue of people waiting to board a bus. However, the bus has a weight limit of 1000 kilograms, so there may be some people who cannot board.
+
+-- Write a solution to find the person_name of the last person that can fit on the bus without exceeding the weight limit. The test cases are generated such that the first person does not exceed the weight limit.
+
+-- The result format is in the following example.
+
+WITH CTS AS (
+    SELECT turn, person_id, person_name, weight, SUM(weight) OVER (ORDER BY turn) AS total_weight
+    FROM Queue
+    ORDER BY turn
+)
+
+SELECT person_name
+FROM CTS
+WHERE total_weight <= 1000
+ORDER BY total_weight DESC
+LIMIT 1;
+
+
+
+
+
+-- 1907. Count Salary Categories
+-- Write a solution to calculate the number of bank accounts for each salary category. The salary categories are:
+
+-- "Low Salary": All the salaries strictly less than $20000.
+-- "Average Salary": All the salaries in the inclusive range [$20000, $50000].
+-- "High Salary": All the salaries strictly greater than $50000.
+-- The result table must contain all three categories. If there are no accounts in a category, return 0.
+
+-- Return the result table in any order.
+
+-- The result format is in the following example.
+
+WITH CTS AS (
+    SELECT
+        CASE 
+            WHEN income < 20000 THEN "Low Salary"  
+            WHEN income > 50000 THEN "High Salary" 
+            ELSE "Average Salary" END 
+            AS category
+    FROM Accounts
+), 
+Categories AS(
+    SELECT 'Low Salary' AS category
+    UNION ALL
+    SELECT 'Average Salary' AS category
+    UNION ALL
+    SELECT 'High Salary' AS category
+)
+SELECT 
+    Categories.category, 
+    COUNT(CTS.category) AS accounts_count
+FROM Categories
+LEFT JOIN CTS
+on Categories.category = CTS.category
+GROUP BY Categories.category
