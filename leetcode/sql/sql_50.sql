@@ -573,3 +573,264 @@ FROM Categories
 LEFT JOIN CTS
 on Categories.category = CTS.category
 GROUP BY Categories.category
+
+
+
+
+-- 1978. Employees Whose Manager Left the Company|
+-- Find the IDs of the employees whose salary is strictly less than $30000 and whose manager left the company. When a manager leaves the company, their information is deleted from the Employees table, but the reports still have their manager_id set to the manager that left.
+
+-- Return the result table ordered by employee_id.
+
+-- The result format is in the following example.
+
+
+SELECT employee_id
+FROM Employees
+WHERE salary <30000 AND manager_id NOT IN (SELECT employee_id FROM Employees)
+ORDER BY employee_id
+
+
+
+
+
+-- 626. Exchange Seats
+-- Write a solution to swap the seat id of every two consecutive students. If the number of students is odd, the id of the last student is not swapped.
+
+-- Return the result table ordered by id in ascending order.
+
+-- The result format is in the following example.
+
+SELECT 
+    CASE 
+        WHEN id = (SELECT MAX(id) FROM seat) AND id % 2 = 1
+            THEN id 
+        WHEN id % 2 = 1
+            THEN id + 1
+        ELSE id - 1
+    END AS id,
+    student
+FROM seat
+ORDER BY id
+
+-- 1667. Fix Names in a Table
+-- Write a solution to fix the names so that only the first character is uppercase and the rest are lowercase.
+
+-- Return the result table ordered by user_id.
+
+-- The result format is in the following example.
+
+SELECT user_id, 
+    CONCAT(UPPER(SUBSTRING(name, 1, 1)), LCASE(SUBSTRING(name, 2))) as name
+FROM Users
+ORDER BY user_id
+
+
+
+-- 1341. Movie Rating
+
+-- Write a solution to:
+
+-- Find the name of the user who has rated the greatest number of movies. In case of a tie, return the lexicographically smaller user name.
+-- Find the movie name with the highest average rating in February 2020. In case of a tie, return the lexicographically smaller movie name.
+-- The result format is in the following example.
+
+
+(SELECT name AS results
+FROM MovieRating JOIN Users USING(user_id)
+GROUP BY name
+ORDER BY COUNT(*) DESC, name
+LIMIT 1)
+
+UNION ALL
+
+(SELECT title AS results
+FROM MovieRating JOIN Movies USING(movie_id)
+WHERE EXTRACT(YEAR_MONTH FROM created_at) = 202002
+GROUP BY title
+ORDER BY AVG(rating) DESC, title
+LIMIT 1);
+
+
+
+
+-- 1321. Restaurant Growth
+-- You are the restaurant owner and you want to analyze a possible expansion (there will be at least one customer every day).
+
+-- Compute the moving average of how much the customer paid in a seven days window (i.e., current day + 6 days before). average_amount should be rounded to two decimal places.
+
+-- Return the result table ordered by visited_on in ascending order.
+
+-- The result format is in the following example.
+WITH DaySum AS (
+    SELECT 
+        visited_on, 
+        SUM(amount) AS amount
+    FROM Customer
+    GROUP BY visited_on
+)
+
+SELECT 
+    a.visited_on,
+    SUM(b.amount) AS amount,
+    ROUND(AVG(b.amount), 2) AS average_amount
+FROM DaySum a, DaySum b
+WHERE DATEDIFF(a.visited_on, b.visited_on) BETWEEN 0 AND 6
+GROUP BY a.visited_on
+HAVING COUNT(*)>6
+ORDER BY a.visited_on
+
+
+
+-- 196. Delete Duplicate Emails
+-- Write a solution to delete all duplicate emails, keeping only one unique email with the smallest id.
+
+-- For SQL users, please note that you are supposed to write a DELETE statement and not a SELECT one.
+
+-- The result format is in the following example.
+
+ 
+
+DELETE p1 
+FROM person p1, person p2
+WHERE p1.email = p2.email AND p1.id>p2.id
+
+
+--Another solution
+DELETE FROM Person
+WHERE id NOT IN (
+    SELECT min_id 
+    FROM (
+        SELECT MIN(id) AS min_id 
+        FROM Person 
+        GROUP BY Email
+        ) AS a)
+
+
+
+-- 176. Second Highest Salary
+-- Write a solution to find the second highest salary from the Employee table. If there is no second highest salary, return null (return None in Pandas).
+
+-- The result format is in the following example.
+
+SELECT MAX(salary) AS SecondHighestSalary
+FROM Employee 
+WHERE salary < (SELECT MAX(salary)FROM Employee);
+
+--Second Solution
+
+select
+(select distinct Salary 
+from Employee order by salary desc 
+limit 1 offset 1) 
+as SecondHighestSalary;
+
+
+
+-- 1179. Reformat Department Table
+-- Reformat the table such that there is a department id column and a revenue column for each month.
+
+-- Return the result table in any order.
+
+-- The result format is in the following example.
+
+SELECT Department.id,
+sum(if(month='Jan',revenue,null)) as Jan_Revenue,
+sum(if(month='Feb',revenue,null)) as Feb_Revenue,
+sum(if(month='Mar',revenue,null)) as Mar_Revenue,
+sum(if(month='Apr',revenue,null)) as Apr_Revenue,
+sum(if(month='May',revenue,null)) as May_Revenue,
+sum(if(month='Jun',revenue,null)) as Jun_Revenue,
+sum(if(month='Jul',revenue,null)) as Jul_Revenue,
+sum(if(month='Aug',revenue,null)) as Aug_Revenue,
+sum(if(month='Sep',revenue,null)) as Sep_Revenue,
+sum(if(month='Oct',revenue,null)) as Oct_Revenue,
+sum(if(month='Nov',revenue,null)) as Nov_Revenue,
+sum(if(month='Dec',revenue,null)) as Dec_Revenue
+from Department 
+GROUP BY id;
+
+
+
+-- 1484. Group Sold Products By The Date
+-- Write a solution to find for each date the number of different products sold and their names.
+
+-- The sold products names for each date should be sorted lexicographically.
+
+-- Return the result table ordered by sell_date.
+
+-- The result format is in the following example.
+SELECT
+    sell_date, 
+    COUNT(DISTINCT product) AS num_sold, 
+    GROUP_CONCAT(
+        DISTINCT product 
+        ORDER BY product ASC 
+        SEPARATOR ','
+    ) AS products
+FROM Activities 
+GROUP BY sell_date 
+ORDER BY sell_date ASC;
+
+
+
+-- 1327. List the Products Ordered in a Period
+-- Write a solution to get the names of products that have at least 100 units ordered in February 2020 and their amount.
+
+-- Return the result table in any order.
+
+-- The result format is in the following example.
+
+SELECT p.product_name, SUM(o.unit) as unit
+FROM Products p 
+JOIN Orders o 
+ON p.product_id = o.product_id
+WHERE DATE(o.order_date) BETWEEN '2020-02-01' AND '2020-02-29'
+GROUP BY o.product_id
+HAVING unit >= 100
+
+
+-- 1517. Find Users With Valid E-Mails
+-- Write a solution to find the users who have valid emails.
+
+-- A valid e-mail has a prefix name and a domain where:
+
+-- The prefix name is a string that may contain letters (upper or lower case), digits, underscore '_', period '.', and/or dash '-'. The prefix name must start with a letter.
+-- The domain is '@leetcode.com'.
+-- Return the result table in any order.
+
+-- The result format is in the following example.
+SELECT *
+FROM Users
+WHERE 
+    mail REGEXP '^[a-zA-Z][a-zA-Z0-9._-]*@leetcode\\.com$';
+
+
+
+
+
+
+-- 602. Friend Requests II: Who Has the Most Friends
+-- Write a solution to find the people who have the most friends and the most friends number.
+
+-- The test cases are generated so that only one person has the most friends.
+
+-- The result format is in the following example.
+
+ 
+
+
+WITH CTS AS (SELECT requester_id  as friends
+FROM RequestAccepted
+
+UNION ALL
+
+SELECT accepter_id  as friends
+FROM RequestAccepted)
+
+
+SELECT friends as id, COUNT( friends) as num
+FROM CTS
+GROUP BY id
+ORDER BY num DESC
+LIMIT 1
