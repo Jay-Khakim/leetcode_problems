@@ -58,7 +58,7 @@ class Graph {
 
 		visited[start] = true;
 		while (stack.length) {
-			console.log(stack)
+			console.log(stack);
 			currentVertex = stack.pop();
 			result.push(currentVertex);
 
@@ -66,6 +66,27 @@ class Graph {
 				if (!visited[neighbor]) {
 					visited[neighbor] = true;
 					stack.push(neighbor);
+				}
+			});
+		}
+		return result;
+	}
+
+	breadthFirst(start) {
+		const quene = [start];
+		const result = [];
+		const visited = {};
+		let currentVertex;
+
+		visited[start] = true;
+		while (quene.length) {
+			currentVertex = quene.shift();
+			result.push(currentVertex);
+
+			this.adjancencyList[currentVertex].forEach(neighbor => {
+				if (!visited[neighbor]) {
+					visited[neighbor] = true;
+					quene.push(neighbor);
 				}
 			});
 		}
@@ -90,5 +111,6 @@ g.addEdge("D", "F");
 g.addEdge("D", "E");
 g.addEdge("E", "F");
 // g.depthFirstRecursive("A");
-console.log(g.depthFirstIterative("A"))
-console.log(g.depthFirstRecursive("A"))
+console.log("DFS Interative " + g.depthFirstIterative("A"));
+console.log("DFS Recursive " + g.depthFirstRecursive("A"));
+console.log("BFS " + g.breadthFirst("A"));
